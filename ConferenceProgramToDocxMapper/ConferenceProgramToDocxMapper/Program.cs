@@ -11,7 +11,7 @@ using System.IO;
 
 namespace ConferenceProgramToDocxMapper
 {
-    public class Program : IDisposable
+    public class Program
     {
         private Application _wordApplication;
         private Document _word;
@@ -42,17 +42,15 @@ namespace ConferenceProgramToDocxMapper
         {
             _wordApplication.ActiveDocument.SaveAs(_fileSavePath, WdSaveFormat.wdFormatDocument);
             // _wordApplication.ActiveDocument.Save();
-            _word.Close();
-        }
 
-        public void Dispose()
-        {
+            // close
+            _word.Close();
+
             if (_wordApplication != null)
             {
                 _wordApplication.Quit();
                 Marshal.FinalReleaseComObject(_wordApplication);
             }
-            //GC.SuppressFinalize(this);
         }
 
         public void AddDaySeparator(string text)

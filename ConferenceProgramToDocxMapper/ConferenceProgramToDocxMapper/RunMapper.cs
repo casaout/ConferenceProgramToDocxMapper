@@ -1,28 +1,49 @@
-﻿using System;
+﻿
+
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using Microsoft.Office.Interop.Word;
-using System.Runtime.InteropServices;
 using System.IO;
 
 namespace ConferenceProgramToDocxMapper
 {
     class RunMapper
     {
-        //private const string _path = @"C:\Users\André\Desktop\Yearbook\Program\Testing";
-        //private const string _fileName = "program-new"; // .docx
+        // input
+        private const string _programJsonUri = "https://www.conference-publishing.com/listJSON.php?Event=FSE16";
+        private const string _programJsonFilePath = @"C:\Users\André\Desktop\Yearbook\Program\Testing\program.json";
+        
+        // output
         private const string _templatePath = @"C:\Users\André\Desktop\Yearbook\Program\Testing\program.docx";
         private const string _exportFilePath = @"C:\Users\André\Desktop\Yearbook\Program\Testing\program-new"; // no file extension! .docx";
 
 
         static void Main(string[] args)
         {
+            var jsonString = string.Empty;
+
+            // download program from conference-publishing.com
+            //using (var webClient = new System.Net.WebClient())
+            //{
+            //    Console.WriteLine("Fetching json from '{0}'.", _programJsonUri);
+            //    jsonString = webClient.DownloadString(_programJsonUri);
+            //}
+
+            // read from json file
+            jsonString = File.ReadAllText(_programJsonFilePath);
+
+            // Now parse with JSON.Net
+            var json = JsonConvert.DeserializeObject<RootObject> (jsonString);
+
+
+
+
+            // generate word file
             var program = new Program(_exportFilePath, _templatePath); // initialize interop word program
 
+
+            // examples:
             program.AddDaySeparator("Saturday, May 14");
             program.AddSessionTitle("Round Table on Privacy Policies/Protocols", "Sat, May 14, 1o:10 - 10:30", "Ballroom B", "Moderator: Tom Zimmermann");
             program.AddBreak("Morning Break", "Sat, May 14, 10:30 - 11:00");
