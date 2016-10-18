@@ -58,14 +58,14 @@ namespace ConferenceProgramToDocxMapper
             AddParagraph("— " + text + " —", "S Date");
         }
 
-        public void AddSessionTitle(string title, string time, string location, string chair = null)
+        public void AddSessionTitle(string title, string time, string location, string chair)
         {
             if (string.IsNullOrEmpty(location)) location = "location unknown";
             var timeLocString = time + ", " + location;
 
             AddParagraph(title, "S Title");
             AddParagraph(timeLocString, "S Title");
-            if (chair != null) AddParagraph(chair, "S Session Chair");
+            if (! string.IsNullOrEmpty(chair)) AddParagraph(chair, "S Session Chair");
         }
 
         public void AddBreak(string title, string time)
