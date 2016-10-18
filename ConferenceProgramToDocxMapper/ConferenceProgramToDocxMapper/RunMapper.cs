@@ -53,8 +53,7 @@ namespace ConferenceProgramToDocxMapper
                     _previousSessionDay = day;
                 }
 
-                var sessionDayTimeString = day.ToString("ddd, MMM d") + ", " + session.Time;
-                program.AddSessionTitle(session.Title, sessionDayTimeString, session.Location, session.ChairsString);
+                program.AddSessionTitle(session);
 
                 // in case there are papers for this session, add them
                 if (session.Items != null)
@@ -65,9 +64,7 @@ namespace ConferenceProgramToDocxMapper
                         {
                             if (paper.Equals(item.Key))
                             {
-                                program.AddPaper(item.Title, item.PersonsString);
-
-                                // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+                                program.AddPaper(item);
                             }
                         }
                     }

@@ -58,14 +58,16 @@ namespace ConferenceProgramToDocxMapper
             AddParagraph("— " + text + " —", "S Date");
         }
 
-        public void AddSessionTitle(string title, string time, string location, string chair)
+        public void AddSessionTitle(Session session)
         {
-            if (string.IsNullOrEmpty(location)) location = "location unknown";
-            var timeLocString = time + ", " + location;
+            var day = DateTime.Parse(session.Day);
+            var sessionDayTimeString = day.ToString("ddd, MMM d") + ", " + session.Time;
+            var location = (string.IsNullOrEmpty(session.Location)) ? "location unknown" : session.Location;
+            var timeLocString = sessionDayTimeString + ", " + location;
 
-            AddParagraph(title, "S Title");
+            AddParagraph(session.Title, "S Title");
             AddParagraph(timeLocString, "S Title");
-            if (! string.IsNullOrEmpty(chair)) AddParagraph(chair, "S Session Chair");
+            if (! string.IsNullOrEmpty(session.ChairsString)) AddParagraph(session.ChairsString, "S Session Chair");
         }
 
         public void AddBreak(string title, string time)
@@ -74,10 +76,14 @@ namespace ConferenceProgramToDocxMapper
             AddParagraph(time, "S Break");
         }
 
-        public void AddPaper(string title, string authors)
+        public void AddPaper(Item paper)
         {
-            AddParagraph(title, "P Title");
-            AddParagraph(authors, "P Author");
+            // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+
+
+            AddParagraph(paper.Title, "P Title");
+            var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
+            AddParagraph(authorString, "P Author");
         }
 
         private void AddParagraph(string text, object styleName = null)
