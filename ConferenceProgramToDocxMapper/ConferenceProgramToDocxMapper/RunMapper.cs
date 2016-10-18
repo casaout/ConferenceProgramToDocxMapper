@@ -23,55 +23,56 @@ namespace ConferenceProgramToDocxMapper
 
         static void Main(string[] args)
         {
-            var jsonString = string.Empty;
-
-            // download program from conference-publishing.com
-            //using (var webClient = new System.Net.WebClient())
-            //{
-            //    Console.WriteLine("Fetching json from '{0}'.", _programJsonUri);
-            //    jsonString = webClient.DownloadString(_programJsonUri);
-            //}
-
-            // read from json file
-            jsonString = File.ReadAllText(Path.Combine(_filePath, _programJsonFile));
-
-            // Now parse with JSON.Net
-            var json = JsonConvert.DeserializeObject<RootObject> (jsonString);
-
             // generate word file
             var program = new Program(Path.Combine(_filePath, _exportFile), Path.Combine(_filePath, _templateFile));
 
-            var _previousSessionDay = DateTime.MinValue;
-            foreach (var session in json.Sessions)
+            try
             {
-                // TODO: handle break
-                var day = DateTime.Parse(session.Day);
+                // get parsed json
+                //var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
+                var json = JsonHelper.GetProgramFromFile(Path.Combine(_filePath, _programJsonFile)); // from file on computer
 
-                if (day == DateTime.MinValue || day > _previousSessionDay)
+                var _previousSessionDay = DateTime.MinValue;
+                foreach (var session in json.Sessions)
                 {
-                    program.AddDaySeparator(day.ToString("dddd, MMMM d"));
-                    _previousSessionDay = day;
-                }
+                    // TODO: handle break
+                    var day = DateTime.Parse(session.Day);
 
-                program.AddSessionTitle(session);
-
-                // in case there are papers for this session, add them
-                if (session.Items != null)
-                {
-                    foreach (var paper in session.Items)
+                    if (day == DateTime.MinValue || day > _previousSessionDay)
                     {
-                        foreach (var item in json.Items)
+                        program.AddDaySeparator(day);
+                        _previousSessionDay = day;
+                    }
+
+                    program.AddSessionTitle(session);
+
+                    // in case there are papers for this session, add them
+                    if (session.Items != null)
+                    {
+                        foreach (var paper in session.Items)
                         {
-                            if (paper.Equals(item.Key))
+                            foreach (var item in json.Items)
                             {
-                                program.AddPaper(item);
+                                if (paper.Equals(item.Key))
+                                {
+                                    program.AddPaper(item);
+                                }
                             }
                         }
                     }
-                }                
-            }
+                }
 
-            program.SaveAndCloseProgram();
+                // save word file
+                program.SaveWordFile();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("> An error occurred: " + e.Message);
+            }
+            finally
+            {
+                if (program != null) program.Close();
+            }
         }
 
         

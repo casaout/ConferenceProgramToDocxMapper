@@ -38,13 +38,18 @@ namespace ConferenceProgramToDocxMapper
             _wordApplication.Visible = true; // show created word document when program runs
         }
 
-        public void SaveAndCloseProgram()
+        public void SaveWordFile()
         {
             _wordApplication.ActiveDocument.SaveAs(_fileSavePath, WdSaveFormat.wdFormatDocument);
             // _wordApplication.ActiveDocument.Save();
+        }
 
-            // close
-            _word.Close();
+        public void Close()
+        {
+            if (_word != null)
+            {
+                _word.Close();
+            }
 
             if (_wordApplication != null)
             {
@@ -53,9 +58,9 @@ namespace ConferenceProgramToDocxMapper
             }
         }
 
-        public void AddDaySeparator(string text)
+        public void AddDaySeparator(DateTime day)
         {
-            AddParagraph("— " + text + " —", "S Date");
+            AddParagraph("— " + day.ToString("dddd, MMMM d") + " —", "S Date");
         }
 
         public void AddSessionTitle(Session session)
@@ -80,8 +85,8 @@ namespace ConferenceProgramToDocxMapper
         {
             // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
 
-
-            AddParagraph(paper.Title, "P Title");
+            var titleString = paper.Title.Replace("&quot;", "\"").Trim();
+            AddParagraph(titleString, "P Title");
             var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
             AddParagraph(authorString, "P Author");
         }
