@@ -84,6 +84,7 @@ namespace ConferenceProgramToDocxMapper
         public void AddPaper(Item paper)
         {
             // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+            //Console.WriteLine(paper.Type);
 
             var titleString = paper.Title.Replace("&quot;", "\"").Trim();
             AddParagraph(titleString, "P Title");

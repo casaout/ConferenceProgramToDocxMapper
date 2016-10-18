@@ -10,6 +10,7 @@ namespace ConferenceProgramToDocxMapper
 {
     class RunMapper
     {
+        // local path for input/output
         private const string _filePath = @"C:\Users\André\Desktop\Yearbook\Program\Testing\";
 
         // input
@@ -29,8 +30,8 @@ namespace ConferenceProgramToDocxMapper
             try
             {
                 // get parsed json
-                //var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
-                var json = JsonHelper.GetProgramFromFile(Path.Combine(_filePath, _programJsonFile)); // from file on computer
+                var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
+                //var json = JsonHelper.GetProgramFromFile(Path.Combine(_filePath, _programJsonFile)); // from file on computer
 
                 var _previousSessionDay = DateTime.MinValue;
                 foreach (var session in json.Sessions)
