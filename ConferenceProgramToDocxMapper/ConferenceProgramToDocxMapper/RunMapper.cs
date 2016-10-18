@@ -41,12 +41,20 @@ namespace ConferenceProgramToDocxMapper
             // generate word file
             var program = new Program(Path.Combine(_filePath, _exportFile), Path.Combine(_filePath, _templateFile));
 
+            var _previousSessionDay = DateTime.MinValue;
             foreach (var session in json.Sessions)
             {
-                // TODO: handle day separator
                 // TODO: handle break
+                var day = DateTime.Parse(session.Day);
 
-                program.AddSessionTitle(session.Title, session.Day + ", " + session.Time, session.Location, session.ChairsString);
+                if (day == DateTime.MinValue || day > _previousSessionDay)
+                {
+                    program.AddDaySeparator(day.ToString("dddd, MMMM d"));
+                    _previousSessionDay = day;
+                }
+
+                var sessionDayTimeString = day.ToString("ddd, MMM d") + ", " + session.Time;
+                program.AddSessionTitle(session.Title, sessionDayTimeString, session.Location, session.ChairsString);
 
                 // in case there are papers for this session, add them
                 if (session.Items != null)
@@ -59,7 +67,7 @@ namespace ConferenceProgramToDocxMapper
                             {
                                 program.AddPaper(item.Title, item.PersonsString);
 
-                                // TODO: add icon
+                                // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
                             }
                         }
                     }
