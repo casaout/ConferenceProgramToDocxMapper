@@ -114,10 +114,21 @@ namespace ConferenceProgramToDocxMapper
             if (! string.IsNullOrEmpty(session.ChairsString)) AddParagraph(session.ChairsString, GetStyle("session_chair"));
         }
 
-        public void AddBreak(string title, string time)
+        public void AddBreak(TimeSpan start, TimeSpan end)
         {
-            AddParagraph(title, GetStyle("session_break"));
-            AddParagraph(time, GetStyle("session_break"));
+            var titleString = (start >= new TimeSpan(11, 30, 0) && start <= new TimeSpan(14, 30, 0) && end >= new TimeSpan(11, 30, 0) && end <= new TimeSpan(14, 30, 0))
+                ? "Lunch Break"
+                : "Break";
+            var timeString = string.Format("{0} - {1}", start.ToString(@"hh\:mm"), end.ToString(@"hh\:mm"));
+
+            AddParagraph(titleString, GetStyle("session_break"));
+            AddParagraph(timeString, GetStyle("session_break"));
+        }
+
+        public void AddBreak(string titleString, string timeString)
+        {
+            AddParagraph(titleString, GetStyle("session_break"));
+            AddParagraph(timeString, GetStyle("session_break"));
         }
 
         public void AddPaper(Item paper)

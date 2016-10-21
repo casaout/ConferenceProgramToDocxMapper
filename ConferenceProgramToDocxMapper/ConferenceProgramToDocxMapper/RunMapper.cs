@@ -42,26 +42,41 @@ namespace ConferenceProgramToDocxMapper
                 program.AddIconLegend();
 
                 var _previousSessionDay = DateTime.MinValue;
+                var _previousSessionEndTime = TimeSpan.MinValue;
                 foreach (var session in json.Sessions)
                 {
-                    // handle day separator
+                    // handle session day and time stuff
                     var day = DateTime.Parse(session.Day);
+                    var timeString = session.Time; // format 08:30 - 09:00
+                    var startTimeString = timeString.Substring(0, timeString.IndexOf('-')).Trim();
+                    var endTimeString = timeString.Substring(timeString.IndexOf('-') + 1, 6).Trim();
+                    var startTime = TimeSpan.Parse(startTimeString);
+                    var endTime = TimeSpan.Parse(endTimeString);
 
+                    // add day separator (if new day)
                     if (day == DateTime.MinValue || day > _previousSessionDay)
                     {
                         program.AddDaySeparator(day);
-                        _previousSessionDay = day;
                     }
 
                     // if the session is a break
                     if (session.Type.Equals("Social"))
                     {
                         program.AddBreak(session.Title, session.Time);
-                        continue;
                     }
                     // if the session is a paper (add all papers)
                     else
                     {
+                        // add break
+                        if (day.Date == _previousSessionDay.Date && // same day
+                            _previousSessionEndTime != TimeSpan.MinValue && // not first item
+                            _previousSessionEndTime < startTime) // gap between
+                        {
+                            program.AddBreak(_previousSessionEndTime, startTime);
+                            program.AddNewLine();
+                        }
+
+                        // add session
                         program.AddSessionTitle(session);
 
                         // in case there are papers for this session, add them
@@ -82,7 +97,10 @@ namespace ConferenceProgramToDocxMapper
                         {
                             program.AddNewLine();
                         }
-                    }                    
+                    }
+
+                    _previousSessionEndTime = endTime;
+                    _previousSessionDay = day;
                 }
 
                 // save word file
