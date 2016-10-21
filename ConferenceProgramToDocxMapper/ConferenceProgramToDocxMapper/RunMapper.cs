@@ -16,7 +16,7 @@ namespace ConferenceProgramToDocxMapper
         // input
         private const string _programJsonUri = "https://www.conference-publishing.com/listJSON.php?Event=FSE16"; // if program is loaded from web
         private const string _programJsonFile = "program-downloaded.json"; // if program is loaded from local file
-        private const string _templateFile = "program.docx"; // word file to define formats (make sure to re-use the style names or change them in Program.cs)
+        private const string _templateFile = "program-template.docx"; // word file to define formats (make sure to re-use the style names or change them in Program.cs)
 
         // output
         private const string _exportFile = "program-processed"; // no file extension! .docx";
@@ -36,7 +36,7 @@ namespace ConferenceProgramToDocxMapper
                 var json = JsonHelper.GetProgramFromFile(Path.Combine(filePath, _programJsonFile)); // from file on computer
 
                 // add conference title
-                //program.AddSessionTitle(); // TODO: change style + format
+                program.AddSessionTitle(json.NameFull);
 
                 // add icon legend
                 program.AddIconLegend();
@@ -54,7 +54,7 @@ namespace ConferenceProgramToDocxMapper
                     }
 
                     // if the session is a break
-                    if (! session.Type.Equals("Research Papers"))
+                    if (session.Type.Equals("Social"))
                     {
                         program.AddBreak(session.Title, session.Time);
                         continue;
@@ -65,7 +65,7 @@ namespace ConferenceProgramToDocxMapper
                         program.AddSessionTitle(session);
 
                         // in case there are papers for this session, add them
-                        if (session.Items != null)
+                        if (session.Items != null && session.Items.Count > 0)
                         {
                             foreach (var paper in session.Items)
                             {
@@ -77,6 +77,10 @@ namespace ConferenceProgramToDocxMapper
                                     }
                                 }
                             }
+                        }
+                        else
+                        {
+                            program.AddNewLine();
                         }
                     }                    
                 }

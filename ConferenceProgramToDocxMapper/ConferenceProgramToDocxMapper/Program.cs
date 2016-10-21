@@ -18,7 +18,7 @@ namespace ConferenceProgramToDocxMapper
         // private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Journal Paper First", "📖" }, { "Research Paper", "📄" }, { "Industry Paper", "⚛" }, { "Demo Paper", "🔭" } };
 
         // define style names per style (as used in word template)
-        private Dictionary<string, string> _stylesDictionary = new Dictionary<string, string> { {"day", "S Date"}, { "session_title", "S Title" }, { "session_chair", "S Session Chair" }, { "session_break", "S Break" }, { "paper_title", "P Title" }, { "paper_author", "P Author" } };
+        private Dictionary<string, string> _stylesDictionary = new Dictionary<string, string> { { "title", "D Title" }, { "legend", "D Legend" }, { "day", "S Date" }, { "session_title", "S Title" }, { "session_chair", "S Session Chair" }, { "session_break", "S Break" }, { "paper_title", "P Title" }, { "paper_author", "P Author" } };
 
         private const bool _showWordWhileFilling = false;
         private const string _cultureFormat = "en-US";
@@ -83,6 +83,12 @@ namespace ConferenceProgramToDocxMapper
             }
 
             Console.WriteLine("> Finished filling word and closed processor.");
+        }
+
+        public void AddSessionTitle(string text)
+        {
+            var titleString = "Program of the " + text;
+            AddParagraph(titleString, GetStyle("title"));
         }
 
         public void AddDaySeparator(DateTime day)
@@ -164,7 +170,12 @@ namespace ConferenceProgramToDocxMapper
             }
 
             legend = legend.Trim().TrimEnd(','); // remove last comma
-            AddParagraph(legend);
+            AddParagraph(legend, GetStyle("legend"));
+        }
+
+        public void AddNewLine()
+        {
+            AddParagraph(string.Empty, "Normal");
         }
 
         private void AddParagraph(string text, object styleName = null)
@@ -174,7 +185,14 @@ namespace ConferenceProgramToDocxMapper
 
             if (styleName != null)
             {
-                paragraph.set_Style(ref styleName);
+                try
+                {
+                    paragraph.set_Style(ref styleName);
+                }
+                catch
+                {
+                    Console.WriteLine("ERROR: style '{0}' does not exist.", styleName);
+                }
             }
 
             paragraph.Range.InsertParagraphAfter();
