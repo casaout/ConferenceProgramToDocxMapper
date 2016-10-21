@@ -22,6 +22,7 @@ namespace ConferenceProgramToDocxMapper
 
         private const bool _showWordWhileFilling = false;
         private const string _cultureFormat = "en-US";
+
         #endregion
 
         #region Fields
@@ -91,6 +92,12 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddSessionTitle(Session session)
         {
+            if (string.IsNullOrEmpty(session.Title))
+            {
+                Console.WriteLine("> WARNING: no session title");
+                return;
+            }
+
             var day = DateTime.Parse(session.Day);
             var sessionDayTimeString = day.ToString("ddd, MMM d") + ", " + session.Time;
             var location = (string.IsNullOrEmpty(session.Location)) ? "location unknown" : session.Location;
@@ -109,6 +116,12 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddPaper(Item paper)
         {
+            if (string.IsNullOrEmpty(paper.Title))
+            {
+                Console.WriteLine("> WARNING: no paper title");
+                return;
+            }
+
             var titleString = GetIcon(paper.Type) + " " + paper.Title;
             AddParagraph(titleString, GetStyle("paper_title"));
             var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);

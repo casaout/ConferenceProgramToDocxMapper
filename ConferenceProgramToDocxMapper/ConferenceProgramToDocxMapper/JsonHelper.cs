@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Text;
 
 namespace ConferenceProgramToDocxMapper
 {
@@ -30,7 +31,7 @@ namespace ConferenceProgramToDocxMapper
         {
             if (File.Exists(filePath))
             {
-                var jsonString = File.ReadAllText(filePath);
+                var jsonString = File.ReadAllText(filePath, Encoding.UTF8);
                 return JsonConvert.DeserializeObject<RootObject>(jsonString);
             }
 
