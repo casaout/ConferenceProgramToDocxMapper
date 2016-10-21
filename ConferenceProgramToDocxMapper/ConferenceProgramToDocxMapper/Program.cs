@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
 using Microsoft.Office.Interop.Word;
 using System.Runtime.InteropServices;
 using System.IO;
@@ -16,13 +11,27 @@ namespace ConferenceProgramToDocxMapper
 {
     public class Program
     {
+        #region Program Settings
+
+        // settings
+        private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Full Paper", "📖" }, { "Invited Talk Paper", "📄" }, { "Invited Talk Abstract", "⚛" }, { "Short Paper", "🔭" } };
+        // private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Journal Paper First", "📖" }, { "Research Paper", "📄" }, { "Industry Paper", "⚛" }, { "Demo Paper", "🔭" } };
+        private const bool _showWordWhileFilling = false;
+        private const string _cultureFormat = "en-US";
+        // TODO: add styles dictionary
+
+        #endregion
+
+        #region Fields
+
         private Application _wordApplication;
         private Document _word;
         private bool _templateUsed;
         private string _fileSavePath;
 
-        private const bool _showWordWhileFilling = false;
-        private const string _cultureFormat = "en-US";
+        #endregion
+
+        #region Methods
 
         public Program(string fileSavePath, string templatePath = null)
         {
@@ -97,12 +106,37 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddPaper(Item paper)
         {
-            // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
-            //Console.WriteLine(paper.Type);
-
-            AddParagraph(paper.Title, "P Title");
+            var titleString = GetIcon(paper.Type) + " " + paper.Title;
+            AddParagraph(titleString, "P Title");
             var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
             AddParagraph(authorString, "P Author");
+        }
+
+        private string GetIcon(string type)
+        {
+            if (_iconDictionary.ContainsKey(type))
+            {
+                return _iconDictionary[type];
+            }
+            else
+            {
+                return string.Empty; // no icon
+            }
+        
+            // other idea: add image as icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+        }
+
+        public void AddIconLegend()
+        {
+            var legend = "Legend: ";
+
+            foreach (var icon in _iconDictionary)
+            {
+                legend += string.Format("{0}: {1}, ", icon.Value, icon.Key);
+            }
+
+            legend = legend.Trim().TrimEnd(','); // remove last comma
+            AddParagraph(legend);
         }
 
         private void AddParagraph(string text, object styleName = null)
@@ -125,5 +159,7 @@ namespace ConferenceProgramToDocxMapper
             text = WebUtility.HtmlDecode(text);
             return text.Trim();
         }
+
+        #endregion
     }
 }

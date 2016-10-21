@@ -33,6 +33,9 @@ namespace ConferenceProgramToDocxMapper
                 //var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
                 var json = JsonHelper.GetProgramFromFile(Path.Combine(_filePath, _programJsonFile)); // from file on computer
 
+                // add icon legend
+                program.AddIconLegend();
+
                 var _previousSessionDay = DateTime.MinValue;
                 foreach (var session in json.Sessions)
                 {
