@@ -13,13 +13,15 @@ namespace ConferenceProgramToDocxMapper
     {
         #region Program Settings
 
-        // settings
+        // define icons per paper type
         private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Full Paper", "📖" }, { "Invited Talk Paper", "📄" }, { "Invited Talk Abstract", "⚛" }, { "Short Paper", "🔭" } };
         // private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Journal Paper First", "📖" }, { "Research Paper", "📄" }, { "Industry Paper", "⚛" }, { "Demo Paper", "🔭" } };
+
+        // define style names per style (as used in word template)
+        private Dictionary<string, string> _stylesDictionary = new Dictionary<string, string> { {"day", "S Date"}, { "session_title", "S Title" }, { "session_chair", "S Session Chair" }, { "session_break", "S Break" }, { "paper_title", "P Title" }, { "paper_author", "P Author" } };
+
         private const bool _showWordWhileFilling = false;
         private const string _cultureFormat = "en-US";
-        // TODO: add styles dictionary
-
         #endregion
 
         #region Fields
@@ -61,6 +63,7 @@ namespace ConferenceProgramToDocxMapper
 
         public void SaveWordFile()
         {
+            if (File.Exists(_fileSavePath)) File.Delete(_fileSavePath); // replace file
             _wordApplication.ActiveDocument.SaveAs(_fileSavePath, WdSaveFormat.wdFormatDocument);
             // _wordApplication.ActiveDocument.Save();
         }
@@ -83,7 +86,7 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddDaySeparator(DateTime day)
         {
-            AddParagraph("— " + day.ToString("dddd, MMMM d") + " —", "S Date");
+            AddParagraph("— " + day.ToString("dddd, MMMM d") + " —", GetStyle("day"));
         }
 
         public void AddSessionTitle(Session session)
@@ -93,23 +96,23 @@ namespace ConferenceProgramToDocxMapper
             var location = (string.IsNullOrEmpty(session.Location)) ? "location unknown" : session.Location;
             var timeLocString = sessionDayTimeString + ", " + location;
 
-            AddParagraph(session.Title, "S Title");
-            AddParagraph(timeLocString, "S Title");
-            if (! string.IsNullOrEmpty(session.ChairsString)) AddParagraph(session.ChairsString, "S Session Chair");
+            AddParagraph(session.Title, GetStyle("session_title"));
+            AddParagraph(timeLocString, GetStyle("session_title"));
+            if (! string.IsNullOrEmpty(session.ChairsString)) AddParagraph(session.ChairsString, GetStyle("session_chair"));
         }
 
         public void AddBreak(string title, string time)
         {
-            AddParagraph(title, "S Break");
-            AddParagraph(time, "S Break");
+            AddParagraph(title, GetStyle("session_break"));
+            AddParagraph(time, GetStyle("session_break"));
         }
 
         public void AddPaper(Item paper)
         {
             var titleString = GetIcon(paper.Type) + " " + paper.Title;
-            AddParagraph(titleString, "P Title");
+            AddParagraph(titleString, GetStyle("paper_title"));
             var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
-            AddParagraph(authorString, "P Author");
+            AddParagraph(authorString, GetStyle("paper_author"));
         }
 
         private string GetIcon(string type)
@@ -124,6 +127,18 @@ namespace ConferenceProgramToDocxMapper
             }
         
             // other idea: add image as icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+        }
+
+        private object GetStyle(string key)
+        {
+            if (_stylesDictionary.ContainsKey(key))
+            {
+                return _stylesDictionary[key];
+            }
+            else
+            {
+                return null; // no style = default style
+            }
         }
 
         public void AddIconLegend()
