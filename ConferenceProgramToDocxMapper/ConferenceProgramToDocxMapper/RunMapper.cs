@@ -32,8 +32,8 @@ namespace ConferenceProgramToDocxMapper
             try
             {
                 // get parsed json
-                //var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
-                var json = JsonHelper.GetProgramFromFile(Path.Combine(filePath, _programJsonFile)); // from file on computer
+                var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
+                //var json = JsonHelper.GetProgramFromFile(Path.Combine(filePath, _programJsonFile)); // from file on computer
 
                 // add conference title
                 program.AddSessionTitle(json.NameFull);
