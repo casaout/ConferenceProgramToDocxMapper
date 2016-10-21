@@ -8,6 +8,9 @@ using System.Reflection;
 using Microsoft.Office.Interop.Word;
 using System.Runtime.InteropServices;
 using System.IO;
+using System.Globalization;
+using System.Threading;
+using System.Net;
 
 namespace ConferenceProgramToDocxMapper
 {
@@ -17,6 +20,9 @@ namespace ConferenceProgramToDocxMapper
         private Document _word;
         private bool _templateUsed;
         private string _fileSavePath;
+
+        private const bool _showWordWhileFilling = false;
+        private const string _cultureFormat = "en-US";
 
         public Program(string fileSavePath, string templatePath = null)
         {
@@ -35,7 +41,13 @@ namespace ConferenceProgramToDocxMapper
                 _word = _wordApplication.Documents.Add();
             }
 
-            _wordApplication.Visible = true; // show created word document when program runs
+            // true: show created word document when program runs
+            _wordApplication.Visible = _showWordWhileFilling;
+
+            // set format of conference program culture
+            Thread.CurrentThread.CurrentCulture = new CultureInfo(_cultureFormat);
+
+            Console.WriteLine("> Word interop started (settings: ShowWordWhileFilling={0}, Culture={1}, TemplateUsed={2})", _showWordWhileFilling, _cultureFormat, _templateUsed);
         }
 
         public void SaveWordFile()
@@ -56,6 +68,8 @@ namespace ConferenceProgramToDocxMapper
                 _wordApplication.Quit();
                 Marshal.FinalReleaseComObject(_wordApplication);
             }
+
+            Console.WriteLine("> Finished filling word and closed processor.");
         }
 
         public void AddDaySeparator(DateTime day)
@@ -86,24 +100,30 @@ namespace ConferenceProgramToDocxMapper
             // TODO: add icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
             //Console.WriteLine(paper.Type);
 
-            var titleString = paper.Title.Replace("&quot;", "\"").Trim();
-            AddParagraph(titleString, "P Title");
+            AddParagraph(paper.Title, "P Title");
             var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
             AddParagraph(authorString, "P Author");
         }
 
         private void AddParagraph(string text, object styleName = null)
         {
-            var paragraph = _word.Paragraphs.Add(); // paragraph.Content.Paragraphs.Add();
-            paragraph.Range.Text = text;
+            var paragraph = _word.Paragraphs.Add();
+            paragraph.Range.Text = FormatString(text);
 
             if (styleName != null)
             {
-                paragraph.set_Style(ref styleName); //_document.Styles[styleName]);
+                paragraph.set_Style(ref styleName);
             }
 
             paragraph.Range.InsertParagraphAfter();
+
+            Console.WriteLine("> Added '{0}' with style '{1}'.", text, styleName);
         }
 
+        private string FormatString(string text)
+        {
+            text = WebUtility.HtmlDecode(text);
+            return text.Trim();
+        }
     }
 }

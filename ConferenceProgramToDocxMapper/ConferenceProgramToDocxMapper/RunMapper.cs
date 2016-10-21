@@ -11,15 +11,15 @@ namespace ConferenceProgramToDocxMapper
     class RunMapper
     {
         // local path for input/output
-        private const string _filePath = @"C:\Users\André\Desktop\Yearbook\Program\Testing\";
+        private const string _filePath = @"C:\Users\info\Desktop\Testing\";
 
         // input
-        private const string _programJsonUri = "https://www.conference-publishing.com/listJSON.php?Event=FSE16";
-        private const string _programJsonFile = "program.json";
-        
+        private const string _programJsonUri = "https://www.conference-publishing.com/listJSON.php?Event=FSE16"; // if program is loaded from web
+        private const string _programJsonFile = "program.json"; // if program is loaded from local file
+        private const string _templateFile = "program.docx"; // word file to define formats (make sure to re-use the style names or change them in Program.cs)
+
         // output
-        private const string _templateFile = "program.docx";
-        private const string _exportFile = "program-new"; // no file extension! .docx";
+        private const string _exportFile = "program-processed"; // no file extension! .docx";
 
 
         static void Main(string[] args)
@@ -30,8 +30,8 @@ namespace ConferenceProgramToDocxMapper
             try
             {
                 // get parsed json
-                var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
-                //var json = JsonHelper.GetProgramFromFile(Path.Combine(_filePath, _programJsonFile)); // from file on computer
+                //var json = JsonHelper.GetProgramFromWebsite(_programJsonUri); // directly from website
+                var json = JsonHelper.GetProgramFromFile(Path.Combine(_filePath, _programJsonFile)); // from file on computer
 
                 var _previousSessionDay = DateTime.MinValue;
                 foreach (var session in json.Sessions)
@@ -68,7 +68,7 @@ namespace ConferenceProgramToDocxMapper
             }
             catch (Exception e)
             {
-                Console.WriteLine("> An error occurred: " + e.Message);
+                Console.WriteLine("> ERROR: " + e.Message);
             }
             finally
             {
