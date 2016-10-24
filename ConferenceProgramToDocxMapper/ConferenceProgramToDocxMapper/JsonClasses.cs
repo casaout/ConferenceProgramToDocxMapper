@@ -69,6 +69,7 @@ namespace ConferenceProgramToDocxMapper
         public string Abstract { get; set; }
         public string Award { get; set; }
         public string Keywords { get; set; }
+        public string Track { get; set; }
     }
 
     public class Session

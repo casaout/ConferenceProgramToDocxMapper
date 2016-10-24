@@ -38,8 +38,8 @@ namespace ConferenceProgramToDocxMapper
                 // add conference title
                 program.AddSessionTitle(json.NameFull);
 
-                // add icon legend
-                program.AddIconLegend();
+                // add icon paper legend
+                //program.AddIconLegend();
 
                 var _previousSessionDay = DateTime.MinValue;
                 var _previousSessionEndTime = TimeSpan.MinValue;
@@ -63,6 +63,7 @@ namespace ConferenceProgramToDocxMapper
                     if (session.Type.Equals("Social"))
                     {
                         program.AddBreak(session.Title, session.Time);
+                        program.AddNewLine();
                     }
                     // if the session is a paper (add all papers)
                     else

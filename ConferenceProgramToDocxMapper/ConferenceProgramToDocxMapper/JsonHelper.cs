@@ -16,6 +16,7 @@ namespace ConferenceProgramToDocxMapper
         {
             using (var webClient = new System.Net.WebClient())
             {
+                webClient.Encoding = Encoding.UTF8;
                 Console.WriteLine("> Fetching json from '{0}'.", uri);
                 var jsonString = webClient.DownloadString(uri);
                 return JsonConvert.DeserializeObject<RootObject>(jsonString);

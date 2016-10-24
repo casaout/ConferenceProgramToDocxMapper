@@ -139,25 +139,44 @@ namespace ConferenceProgramToDocxMapper
                 return;
             }
 
-            var titleString = GetIcon(paper.Type) + " " + paper.Title;
+            var titleString = GetPaperTitleString(paper);
             AddParagraph(titleString, GetStyle("paper_title"));
             var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
             AddParagraph(authorString, GetStyle("paper_author"));
         }
 
-        private string GetIcon(string type)
+        private string GetPaperTitleString(Item paper)
         {
-            if (_iconDictionary.ContainsKey(type))
+            //var titleString = GetIcon(paper.Type) + " " + paper.Title;
+
+            var type = paper.Type.TrimEnd('s').Trim(); // removing 's' from type as it's given in plural form
+            type = type.Replace("Paper", "").Trim(); // remove 'paper', it's sufficient to have 'Short' or 'Full'
+            type = type.Replace("Invited Talk Abstract", "").Trim(); // not needed
+            type = type.Replace("Abstract", "").Trim(); // not needed
+
+            if (string.IsNullOrEmpty(type))
             {
-                return _iconDictionary[type];
+                return paper.Title;
             }
             else
             {
-                return string.Empty; // no icon
+                return string.Format("{0} ({1})", paper.Title, type);
             }
-        
-            // other idea: add image as icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
         }
+
+        //private string GetIcon(string type)
+        //{
+        //    if (_iconDictionary.ContainsKey(type))
+        //    {
+        //        return _iconDictionary[type];
+        //    }
+        //    else
+        //    {
+        //        return string.Empty; // no icon
+        //    }
+        
+        //    // other idea: add image as icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+        //}
 
         private object GetStyle(string key)
         {
@@ -171,22 +190,22 @@ namespace ConferenceProgramToDocxMapper
             }
         }
 
-        public void AddIconLegend()
-        {
-            var legend = "Legend: ";
+        //public void AddIconLegend()
+        //{
+        //    var legend = "Legend: ";
 
-            foreach (var icon in _iconDictionary)
-            {
-                legend += string.Format("{0}: {1}, ", icon.Value, icon.Key);
-            }
+        //    foreach (var icon in _iconDictionary)
+        //    {
+        //        legend += string.Format("{0}: {1}, ", icon.Value, icon.Key);
+        //    }
 
-            legend = legend.Trim().TrimEnd(','); // remove last comma
-            AddParagraph(legend, GetStyle("legend"));
-        }
+        //    legend = legend.Trim().TrimEnd(','); // remove last comma
+        //    AddParagraph(legend, GetStyle("legend"));
+        //}
 
         public void AddNewLine()
         {
-            AddParagraph(string.Empty, "Normal");
+            AddParagraph(string.Empty, "Standard");
         }
 
         private void AddParagraph(string text, object styleName = null)
