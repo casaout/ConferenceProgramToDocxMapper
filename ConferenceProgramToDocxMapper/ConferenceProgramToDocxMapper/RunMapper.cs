@@ -45,6 +45,9 @@ namespace ConferenceProgramToDocxMapper
                 var _previousSessionEndTime = TimeSpan.MinValue;
                 foreach (var session in json.Sessions)
                 {
+                    // if message from chair (exception)
+                    if (session.Title.Equals("Message from the Chairs")) continue;
+
                     // handle session day and time stuff
                     var day = DateTime.Parse(session.Day);
                     var timeString = session.Time; // format 08:30 - 09:00
