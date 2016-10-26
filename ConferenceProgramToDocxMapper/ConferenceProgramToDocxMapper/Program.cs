@@ -14,8 +14,12 @@ namespace ConferenceProgramToDocxMapper
         #region Program Settings
 
         // define icons per paper type
-        private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Full Paper", "📖" }, { "Invited Talk Paper", "📄" }, { "Invited Talk Abstract", "⚛" }, { "Short Paper", "🔭" } };
-        // private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Journal Paper First", "📖" }, { "Research Paper", "📄" }, { "Industry Paper", "⚛" }, { "Demo Paper", "🔭" } };
+        private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Paper with Artifact", "📎" }, { "Distinguished Paper", "🏆" } };
+        // { "Full Paper", "📖" }, { "Invited Talk Paper", "📄" }, { "Invited Talk Abstract", "⚛" }, { "Short Paper", "🔭" 
+        // { "Journal Paper First", "📖" }, { "Research Paper", "📄" }, { "Industry Paper", "⚛" }, { "Demo Paper", "🔭" }
+
+        private List<string> _distinguishedPaperIds = new List<string> { "fse16main-mainid163-p", "fse16main-mainid221-p", "fse16main-mainid132-p", "fse16main-mainid60-p", "fse16main-mainid242-p", "fse16main-mainid192-p", "fse16main-mainid65-p" };
+        private List<string> _paperWithArtifactsIds = new List<string> { "fse16main-mainid146-p", "fse16main-mainid43-p", "fse16main-mainid65-p", "fse16main-mainid241-p", "fse16main-mainid221-p", "fse16main-mainid230-p", "fse16main-mainid129-p", "fse16main-mainid263-p", "fse16main-mainid84-p", "fse16main-mainid169-p", "fse16main-mainid73-p", "fse16main-mainid39-p", "fse16main-mainid16-p", "fse16main-mainid223-p", "fse16main-mainid233-p", "fse16main-mainid247-p", "fse16main-mainid198-p" };
 
         // define style names per style (as used in word template)
         private Dictionary<string, string> _stylesDictionary = new Dictionary<string, string> { { "title", "D Title" }, { "legend", "D Legend" }, { "day", "S Date" }, { "session_title", "S Title" }, { "session_chair", "S Session Chair" }, { "session_break", "S Break" }, { "paper_title", "P Title" }, { "paper_author", "P Author" } };
@@ -147,36 +151,46 @@ namespace ConferenceProgramToDocxMapper
 
         private string GetPaperTitleString(Item paper)
         {
-            //var titleString = GetIcon(paper.Type) + " " + paper.Title;
-
             var type = paper.Type.TrimEnd('s').Trim(); // removing 's' from type as it's given in plural form
             type = type.Replace("Paper", "").Trim(); // remove 'paper', it's sufficient to have 'Short' or 'Full'
             type = type.Replace("Invited Talk Abstract", "").Trim(); // not needed
             type = type.Replace("Abstract", "").Trim(); // not needed
 
+            var icon = GetIconSpecialCase(paper);
+
+            var titleString = (string.IsNullOrEmpty(icon)) ? paper.Title : icon + " " + paper.Title;
+
             if (string.IsNullOrEmpty(type))
             {
-                return paper.Title;
+                return titleString;
             }
             else
             {
-                return string.Format("{0} ({1})", paper.Title, type);
+                return string.Format("{0} ({1})", titleString, type);
             }
         }
 
-        //private string GetIcon(string type)
-        //{
-        //    if (_iconDictionary.ContainsKey(type))
-        //    {
-        //        return _iconDictionary[type];
-        //    }
-        //    else
-        //    {
-        //        return string.Empty; // no icon
-        //    }
-        
-        //    // other idea: add image as icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
-        //}
+        private string GetIconSpecialCase(Item paper)
+        {
+            var iconString = string.Empty;
+            if (_distinguishedPaperIds.Contains(paper.Key)) iconString += GetIcon("Distinguished Paper") + " ";
+            if (_paperWithArtifactsIds.Contains(paper.Key)) iconString += GetIcon("Paper with Artifact") + " ";
+            return iconString.Trim();
+        }
+
+        private string GetIcon(string type)
+        {
+            if (_iconDictionary.ContainsKey(type))
+            {
+                return _iconDictionary[type];
+            }
+            else
+            {
+                return string.Empty; // no icon
+            }
+
+            // other idea: add image as icon (https://msdn.microsoft.com/en-us/library/ms178792.aspx)
+        }
 
         private object GetStyle(string key)
         {
@@ -190,18 +204,18 @@ namespace ConferenceProgramToDocxMapper
             }
         }
 
-        //public void AddIconLegend()
-        //{
-        //    var legend = "Legend: ";
+        public void AddIconLegend()
+        {
+            var legend = "Legend: ";
 
-        //    foreach (var icon in _iconDictionary)
-        //    {
-        //        legend += string.Format("{0}: {1}, ", icon.Value, icon.Key);
-        //    }
+            foreach (var icon in _iconDictionary)
+            {
+                legend += string.Format("{0}: {1}, ", icon.Value, icon.Key);
+            }
 
-        //    legend = legend.Trim().TrimEnd(','); // remove last comma
-        //    AddParagraph(legend, GetStyle("legend"));
-        //}
+            legend = legend.Trim().TrimEnd(','); // remove last comma
+            AddParagraph(legend, GetStyle("legend"));
+        }
 
         public void AddNewLine()
         {
