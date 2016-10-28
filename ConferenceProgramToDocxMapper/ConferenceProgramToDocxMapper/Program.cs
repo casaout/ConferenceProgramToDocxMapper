@@ -163,7 +163,8 @@ namespace ConferenceProgramToDocxMapper
             // create typeString
             var typeString = string.Empty;
             if (paper.Type.Equals("Journal-First Paper")) typeString = "Journal First";
-            if (paper.Track.Equals("Tool Demonstration")) typeString = "Demo";
+            if (paper.Key.Contains("demo")) typeString = "Demo";
+            // where industry?
 
             //if (type.Equals("Research Paper") || type.Equals("Doctoral Symposium") || type.Equals("Keynote")) type = string.Empty
             //var type = paper.Track.TrimEnd('s').Trim(); // removing 's' from type as it's given in plural form

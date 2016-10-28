@@ -62,7 +62,7 @@ namespace ConferenceProgramToDocxMapper
                         program.AddDaySeparator(day);
                     }
 
-                    // if the session is a break
+                    // (Exception case) if the session is a break
                     if (session.Type.Equals("Social"))
                     {
                         program.AddBreak(session.Title, session.Time);
@@ -90,9 +90,10 @@ namespace ConferenceProgramToDocxMapper
                             {
                                 foreach (var item in json.Items)
                                 {
-                                    if (paper.Equals(item.Key))
+                                    if (paper.Equals(item.Key)) //&& session.Type == item.Track) // for some reason doesn't work for visions-track and keynote-track
                                     {
                                         program.AddPaper(item);
+                                        break; // if there are duplicates, only first one
                                     }
                                 }
                             }
