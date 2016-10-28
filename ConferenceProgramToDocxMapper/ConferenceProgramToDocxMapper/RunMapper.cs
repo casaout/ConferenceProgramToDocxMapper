@@ -39,7 +39,7 @@ namespace ConferenceProgramToDocxMapper
                 program.AddSessionTitle(json.NameFull);
 
                 // add icon paper legend
-                //program.AddIconLegend();
+                program.AddIconLegend();
 
                 var _previousSessionDay = DateTime.MinValue;
                 var _previousSessionEndTime = TimeSpan.MinValue;

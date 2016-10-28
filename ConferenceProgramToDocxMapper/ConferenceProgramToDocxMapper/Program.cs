@@ -115,7 +115,13 @@ namespace ConferenceProgramToDocxMapper
 
             AddParagraph(session.Title, GetStyle("session_title"));
             AddParagraph(timeLocString, GetStyle("session_title"));
-            if (! string.IsNullOrEmpty(session.ChairsString)) AddParagraph(session.ChairsString, GetStyle("session_chair"));
+
+            if (! string.IsNullOrEmpty(session.ChairsString) && session.Chairs.Count > 0)
+            {
+                var sessionChairString = (session.ChairsString.Contains(",")) ? "Session Chairs: " : "Session Chair: "; // json is not formatted well enough, else we could use: (session.Chairs.Count > 1)
+                sessionChairString += session.ChairsString;
+                AddParagraph(sessionChairString, GetStyle("session_chair"));
+            }
         }
 
         public void AddBreak(TimeSpan start, TimeSpan end)
@@ -151,23 +157,25 @@ namespace ConferenceProgramToDocxMapper
 
         private string GetPaperTitleString(Item paper)
         {
-            var type = paper.Type.TrimEnd('s').Trim(); // removing 's' from type as it's given in plural form
-            type = type.Replace("Paper", "").Trim(); // remove 'paper', it's sufficient to have 'Short' or 'Full'
-            type = type.Replace("Invited Talk Abstract", "").Trim(); // not needed
-            type = type.Replace("Abstract", "").Trim(); // not needed
-
             var icon = GetIconSpecialCase(paper);
-
             var titleString = (string.IsNullOrEmpty(icon)) ? paper.Title : icon + " " + paper.Title;
 
-            if (string.IsNullOrEmpty(type))
-            {
-                return titleString;
-            }
-            else
-            {
-                return string.Format("{0} ({1})", titleString, type);
-            }
+            // create typeString
+            var typeString = string.Empty;
+            if (paper.Type.Equals("Journal-First Paper")) typeString = "Journal First";
+            if (paper.Track.Equals("Tool Demonstration")) typeString = "Demo";
+
+            //if (type.Equals("Research Paper") || type.Equals("Doctoral Symposium") || type.Equals("Keynote")) type = string.Empty
+            //var type = paper.Track.TrimEnd('s').Trim(); // removing 's' from type as it's given in plural form
+            //if (type.Equals("Tool Demonstration")) type = "Demo";
+            //if (type.Equals("Research Paper") || type.Equals("Doctoral Symposium") || type.Equals("Keynote")) type = string.Empty;
+            //type = type.Replace("Paper", "").Trim(); // remove 'paper', it's sufficient to have 'Short' or 'Full'
+            //type = type.Replace("Tool Demonstration", "Demo").Trim(); // not needed
+            //type = type.Replace("Abstract", "").Trim(); // not needed
+
+
+            // add type string if there is any
+            return (string.IsNullOrEmpty(typeString)) ? titleString : string.Format("{0} ({1})", titleString, typeString);
         }
 
         private string GetIconSpecialCase(Item paper)

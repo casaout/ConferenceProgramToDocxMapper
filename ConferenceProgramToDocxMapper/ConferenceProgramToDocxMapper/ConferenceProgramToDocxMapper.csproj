@@ -60,8 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="Data\program.docx" />
-    <None Include="Data\program_downloaded.json" />
+    <None Include="Data\program-downloaded.json" />
+    <None Include="Data\program-processed.doc" />
+    <None Include="Data\program-template.docx" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
