@@ -45,7 +45,7 @@ namespace ConferenceProgramToDocxMapper
                 var _previousSessionEndTime = TimeSpan.MinValue;
                 foreach (var session in json.Sessions)
                 {
-                    // if message from chair (exception)
+                    // (Exception case) f message from chair
                     if (session.Title.Equals("Message from the Chairs")) continue;
 
                     // handle session day and time stuff
@@ -68,10 +68,16 @@ namespace ConferenceProgramToDocxMapper
                         program.AddBreak(session.Title, session.Time);
                         program.AddNewLine();
                     }
+                    // (Exception case) do not show papers for demo track
+                    else if (session.Type.Equals("Tool Demonstrations"))
+                    {
+                        program.AddBreak("Tool Demonstrations", "", session.Location);
+                        // don't add new line, as the next item (break) will do this
+                    }
                     // if the session is a paper (add all papers)
                     else
                     {
-                        // add break
+                        // add break (TODO: still needed?)
                         if (day.Date == _previousSessionDay.Date && // same day
                             _previousSessionEndTime != TimeSpan.MinValue && // not first item
                             _previousSessionEndTime < startTime) // gap between
@@ -80,8 +86,18 @@ namespace ConferenceProgramToDocxMapper
                             program.AddNewLine();
                         }
 
-                        // add session
-                        program.AddSessionTitle(session);
+
+                        // (Exception case) show keynotes differently to normal sessions
+                        if (session.Type.Equals("Keynote"))
+                        {
+                            program.AddKeynote(session);
+                        }
+                        // default case: add session
+                        else
+                        {
+                            program.AddSessionTitle(session);
+                        }
+
 
                         // in case there are papers for this session, add them
                         if (session.Items != null && session.Items.Count > 0)

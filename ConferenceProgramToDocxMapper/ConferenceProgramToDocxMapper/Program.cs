@@ -100,9 +100,11 @@ namespace ConferenceProgramToDocxMapper
             AddParagraph("— " + day.ToString("dddd, MMMM d") + " —", GetStyle("day"));
         }
 
-        public void AddSessionTitle(Session session)
+        public void AddSessionTitle(Session session, bool isKeynote = false)
         {
-            if (string.IsNullOrEmpty(session.Title))
+            var sessionTitle = (isKeynote) ? "Keynote" : session.Title;
+
+            if (string.IsNullOrEmpty(sessionTitle))
             {
                 Console.WriteLine("> WARNING: no session title");
                 return;
@@ -113,32 +115,37 @@ namespace ConferenceProgramToDocxMapper
             var location = (string.IsNullOrEmpty(session.Location)) ? "location unknown" : session.Location;
             var timeLocString = sessionDayTimeString + ", " + location;
 
-            AddParagraph(session.Title, GetStyle("session_title"));
+            AddParagraph(sessionTitle, GetStyle("session_title"));
             AddParagraph(timeLocString, GetStyle("session_title"));
 
             if (! string.IsNullOrEmpty(session.ChairsString) && session.Chairs.Count > 0)
             {
-                var sessionChairString = (session.ChairsString.Contains(",")) ? "Session Chairs: " : "Session Chair: "; // json is not formatted well enough, else we could use: (session.Chairs.Count > 1)
+                var sessionChairString = (session.ChairsString.Contains(",")) ? "Session Chairs: " : "Session Chair: "; // (Exception case) json is not formatted well enough, else we could use: (session.Chairs.Count > 1)
                 sessionChairString += session.ChairsString;
                 AddParagraph(sessionChairString, GetStyle("session_chair"));
             }
         }
 
-        public void AddBreak(TimeSpan start, TimeSpan end)
+        public void AddKeynote(Session session)
+        {
+            AddSessionTitle(session, true);
+        }
+
+        public void AddBreak(TimeSpan start, TimeSpan end, string location = null)
         {
             var titleString = (start >= new TimeSpan(11, 30, 0) && start <= new TimeSpan(14, 30, 0) && end >= new TimeSpan(11, 30, 0) && end <= new TimeSpan(14, 30, 0))
                 ? "Lunch Break"
                 : "Break";
             var timeString = string.Format("{0} - {1}", start.ToString(@"hh\:mm"), end.ToString(@"hh\:mm"));
 
-            AddParagraph(titleString, GetStyle("session_break"));
-            AddParagraph(timeString, GetStyle("session_break"));
+            AddBreak(titleString, timeString, location);
         }
 
-        public void AddBreak(string titleString, string timeString)
+        public void AddBreak(string titleString, string timeString = null, string location = null)
         {
+            titleString += (string.IsNullOrEmpty(location)) ? string.Empty : ", " + location;
             AddParagraph(titleString, GetStyle("session_break"));
-            AddParagraph(timeString, GetStyle("session_break"));
+            if (! string.IsNullOrEmpty(timeString)) AddParagraph(timeString, GetStyle("session_break"));
         }
 
         public void AddPaper(Item paper)
@@ -162,9 +169,11 @@ namespace ConferenceProgramToDocxMapper
 
             // create typeString
             var typeString = string.Empty;
-            if (paper.Type.Equals("Journal-First Paper")) typeString = "Journal First";
-            if (paper.Key.Contains("demo")) typeString = "Demo";
-            // where industry?
+            if (paper.Key.Contains("fse16var")) typeString = "Visions and Reflections";
+            else if (paper.Key.Contains("fse16ind")) typeString = "Industry";
+            else if (paper.Key.Contains("fse16demo")) typeString = "Demo";
+            //if (paper.Type.Equals("Journal-First Paper")) typeString = "Journal First";
+            //if (paper.Key.Contains("demo")) typeString = "Demo";
 
             //if (type.Equals("Research Paper") || type.Equals("Doctoral Symposium") || type.Equals("Keynote")) type = string.Empty
             //var type = paper.Track.TrimEnd('s').Trim(); // removing 's' from type as it's given in plural form
