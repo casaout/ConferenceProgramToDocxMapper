@@ -67,7 +67,7 @@ namespace ConferenceProgramToDocxMapper
             Console.WriteLine("> Word interop started (settings: ShowWordWhileFilling={0}, Culture={1}, TemplateUsed={2})", _showWordWhileFilling, _cultureFormat, _templateUsed);
         }
 
-        public void SaveWordFile()
+        public void SaveFile()
         {
             if (File.Exists(_fileSavePath)) File.Delete(_fileSavePath); // replace file
             _wordApplication.ActiveDocument.SaveAs(_fileSavePath, WdSaveFormat.wdFormatDocument);

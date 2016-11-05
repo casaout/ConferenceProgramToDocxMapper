@@ -130,7 +130,7 @@ namespace ConferenceProgramToDocxMapper
                 }
 
                 // save word file
-                program.SaveWordFile();
+                program.SaveFile();
             }
             catch (Exception e)
             {
@@ -245,7 +245,7 @@ namespace ConferenceProgramToDocxMapper
                 }
 
                 // save word file
-                program.SaveWordFile();
+                program.SaveFile();
             }
             catch (Exception e)
             {

@@ -47,7 +47,7 @@ namespace ConferenceProgramToDocxMapper
             Thread.CurrentThread.CurrentCulture = new CultureInfo(_cultureFormat);
         }
 
-        public void SaveWordFile()
+        public void SaveFile()
         {
             if (File.Exists(_fileSavePath)) File.Delete(_fileSavePath); // replace file
 
@@ -223,7 +223,7 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddNewLine()
         {
-            AddParagraph(string.Empty, "Standard");
+            AddParagraph(string.Empty, "");
         }
 
         private void AddParagraph(string text, object styleName = null)
