@@ -52,10 +52,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JsonClasses.cs" />
-    <Compile Include="JsonHelper.cs" />
+    <Compile Include="Helpers\JsonClasses.cs" />
+    <Compile Include="Helpers\JsonHelper.cs" />
+    <Compile Include="Program\IProgram.cs" />
+    <Compile Include="Program\ProgramHtml.cs" />
     <Compile Include="RunMapper.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Program\ProgramWord.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +66,9 @@
     <None Include="Data\program-processed.doc" />
     <None Include="Data\program-template.docx" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Data\program-processed.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

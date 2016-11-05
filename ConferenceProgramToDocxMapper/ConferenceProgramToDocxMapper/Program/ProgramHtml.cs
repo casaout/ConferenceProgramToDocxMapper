@@ -6,15 +6,16 @@ using System.IO;
 using System.Globalization;
 using System.Threading;
 using System.Net;
+using ConferenceProgramToDocxMapper.Program;
 
 namespace ConferenceProgramToDocxMapper
 {
-    public class Program
+    public class ProgramHtml : IProgram
     {
         #region Program Settings
 
         // define icons per paper type
-        private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { { "Paper with Artifact", "📎" }, { "Distinguished Paper", "🏆" } };
+        private Dictionary<string, string> _iconDictionary = new Dictionary<string, string> { }; // { "Paper with Artifact", "📎" }, { "Distinguished Paper", "🏆" } };
         // { "Full Paper", "📖" }, { "Invited Talk Paper", "📄" }, { "Invited Talk Abstract", "⚛" }, { "Short Paper", "🔭" 
         // { "Journal Paper First", "📖" }, { "Research Paper", "📄" }, { "Industry Paper", "⚛" }, { "Demo Paper", "🔭" }
 
@@ -22,7 +23,7 @@ namespace ConferenceProgramToDocxMapper
         private List<string> _paperWithArtifactsIds = new List<string> { "fse16main-mainid146-p", "fse16main-mainid43-p", "fse16main-mainid65-p", "fse16main-mainid241-p", "fse16main-mainid221-p", "fse16main-mainid230-p", "fse16main-mainid129-p", "fse16main-mainid263-p", "fse16main-mainid84-p", "fse16main-mainid169-p", "fse16main-mainid73-p", "fse16main-mainid39-p", "fse16main-mainid16-p", "fse16main-mainid223-p", "fse16main-mainid233-p", "fse16main-mainid247-p", "fse16main-mainid198-p" };
 
         // define style names per style (as used in word template)
-        private Dictionary<string, string> _stylesDictionary = new Dictionary<string, string> { { "title", "D Title" }, { "legend", "D Legend" }, { "day", "S Date" }, { "session_title", "S Title" }, { "session_chair", "S Session Chair" }, { "session_break", "S Break" }, { "paper_title", "P Title" }, { "paper_author", "P Author" } };
+        private Dictionary<string, string> _stylesDictionary = new Dictionary<string, string> { { "title", "h1" }, { "legend", "" }, { "day", "h1" }, { "session_title_time", "h2" }, { "session_title", "h3" }, { "session_chair", "" }, { "session_break", "h3" }, { "paper_title", "" }, { "paper_author", "" } };
 
         private const bool _showWordWhileFilling = false;
         private const string _cultureFormat = "en-US";
@@ -31,75 +32,49 @@ namespace ConferenceProgramToDocxMapper
 
         #region Fields
 
-        private Application _wordApplication;
-        private Document _word;
-        private bool _templateUsed;
+        private string _html;
         private string _fileSavePath;
 
         #endregion
 
         #region Methods
 
-        public Program(string fileSavePath, string templatePath = null)
+        public ProgramHtml(string fileSavePath, string templatePath = null)
         {
             _fileSavePath = fileSavePath;
-            _wordApplication = new Application();
-
-            // open existing word file (to re-use styles)
-            if (templatePath != null && File.Exists(templatePath))
-            {
-                _word = _wordApplication.Documents.Open(templatePath);
-                _templateUsed = true;
-            }
-            // create new word file
-            else
-            {
-                _word = _wordApplication.Documents.Add();
-            }
-
-            // true: show created word document when program runs
-            _wordApplication.Visible = _showWordWhileFilling;
 
             // set format of conference program culture
             Thread.CurrentThread.CurrentCulture = new CultureInfo(_cultureFormat);
-
-            Console.WriteLine("> Word interop started (settings: ShowWordWhileFilling={0}, Culture={1}, TemplateUsed={2})", _showWordWhileFilling, _cultureFormat, _templateUsed);
         }
 
         public void SaveWordFile()
         {
             if (File.Exists(_fileSavePath)) File.Delete(_fileSavePath); // replace file
-            _wordApplication.ActiveDocument.SaveAs(_fileSavePath, WdSaveFormat.wdFormatDocument);
-            // _wordApplication.ActiveDocument.Save();
+
+            var template = "<html><head></head><body>{0}</body></html>";
+            var html = string.Format(template, _html);
+
+            File.WriteAllText(_fileSavePath + ".html", html, System.Text.Encoding.UTF8);
         }
 
         public void Close()
         {
-            if (_word != null)
-            {
-                _word.Close();
-            }
-
-            if (_wordApplication != null)
-            {
-                _wordApplication.Quit();
-                Marshal.FinalReleaseComObject(_wordApplication);
-            }
-
             Console.WriteLine("> Finished filling word and closed processor.");
         }
 
-        public void AddSessionTitle(string text)
+        public void AddConferenceTitle(string text)
         {
-            var titleString = "Program of the " + text;
-            AddParagraph(titleString, GetStyle("title"));
+            //var titleString = "Program of the " + text;
+            //AddParagraph(titleString, GetStyle("title"));
         }
 
         public void AddDaySeparator(DateTime day)
         {
-            AddParagraph("— " + day.ToString("dddd, MMMM d") + " —", GetStyle("day"));
+            //AddParagraph("— " + day.ToString("dddd, MMMM d") + " —", GetStyle("day"));
+            AddParagraph(day.ToString("dddd, MMMM d"), GetStyle("day"));
         }
 
+        private string _previousSessionTime = string.Empty;
         public void AddSessionTitle(Session session, bool isKeynote = false)
         {
             var sessionTitle = (isKeynote) ? "Keynote" : session.Title;
@@ -110,20 +85,25 @@ namespace ConferenceProgramToDocxMapper
                 return;
             }
 
-            var day = DateTime.Parse(session.Day);
-            var sessionDayTimeString = day.ToString("ddd, MMM d") + ", " + session.Time;
-            var location = (string.IsNullOrEmpty(session.Location)) ? "location unknown" : session.Location;
-            var timeLocString = sessionDayTimeString + ", " + location;
+            //var day = DateTime.Parse(session.Day);
+            //var sessionDayTimeString = day.ToString("ddd, MMM d") + ", " + session.Time;
+            //var location = (string.IsNullOrEmpty(session.Location)) ? "location unknown" : session.Location;
+            //var timeLocString = sessionDayTimeString + ", " + location;
 
-            AddParagraph(sessionTitle, GetStyle("session_title"));
-            AddParagraph(timeLocString, GetStyle("session_title"));
-
-            if (! string.IsNullOrEmpty(session.ChairsString) && session.Chairs.Count > 0)
+            if (! _previousSessionTime.Equals(session.Time))
             {
-                var sessionChairString = (session.ChairsString.Contains(",")) ? "Session Chairs: " : "Session Chair: "; // (Exception case) json is not formatted well enough, else we could use: (session.Chairs.Count > 1)
-                sessionChairString += session.ChairsString;
-                AddParagraph(sessionChairString, GetStyle("session_chair"));
+                AddParagraph(session.Time, GetStyle("session_title_time"));
+                _previousSessionTime = session.Time;
             }
+            AddParagraph(sessionTitle, GetStyle("session_title"));
+            
+
+            //if (! string.IsNullOrEmpty(session.ChairsString) && session.Chairs.Count > 0)
+            //{
+            //    var sessionChairString = (session.ChairsString.Contains(",")) ? "Session Chairs: " : "Session Chair: "; // (Exception case) json is not formatted well enough, else we could use: (session.Chairs.Count > 1)
+            //    sessionChairString += session.ChairsString;
+            //    AddParagraph(sessionChairString, GetStyle("session_chair"));
+            //}
         }
 
         public void AddKeynote(Session session)
@@ -133,19 +113,19 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddBreak(TimeSpan start, TimeSpan end, string location = null)
         {
-            var titleString = (start >= new TimeSpan(11, 30, 0) && start <= new TimeSpan(14, 30, 0) && end >= new TimeSpan(11, 30, 0) && end <= new TimeSpan(14, 30, 0))
-                ? "Lunch Break"
-                : "Break";
-            var timeString = string.Format("{0} - {1}", start.ToString(@"hh\:mm"), end.ToString(@"hh\:mm"));
+            //var titleString = (start >= new TimeSpan(11, 30, 0) && start <= new TimeSpan(14, 30, 0) && end >= new TimeSpan(11, 30, 0) && end <= new TimeSpan(14, 30, 0))
+            //    ? "Lunch Break"
+            //    : "Break";
+            //var timeString = string.Format("{0} - {1}", start.ToString(@"hh\:mm"), end.ToString(@"hh\:mm"));
 
-            AddBreak(titleString, timeString, location);
+            //AddBreak(titleString, timeString, location);
         }
 
         public void AddBreak(string titleString, string timeString = null, string location = null)
         {
-            titleString += (string.IsNullOrEmpty(location)) ? string.Empty : ", " + location;
-            AddParagraph(titleString, GetStyle("session_break"));
-            if (! string.IsNullOrEmpty(timeString)) AddParagraph(timeString, GetStyle("session_break"));
+            //titleString += (string.IsNullOrEmpty(location)) ? string.Empty : ", " + location;
+            //AddParagraph(titleString, GetStyle("session_break"));
+            //if (! string.IsNullOrEmpty(timeString)) AddParagraph(timeString, GetStyle("session_break"));
         }
 
         public void AddPaper(Item paper)
@@ -156,10 +136,14 @@ namespace ConferenceProgramToDocxMapper
                 return;
             }
 
-            var titleString = GetPaperTitleString(paper);
-            AddParagraph(titleString, GetStyle("paper_title"));
-            var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
-            AddParagraph(authorString, GetStyle("paper_author"));
+            //var titleString = GetPaperTitleString(paper);
+            //AddParagraph(titleString, GetStyle("paper_title"));
+            //var authorString = string.Format("{0} ({1})", paper.PersonsString, paper.AffiliationsString);
+            //AddParagraph(authorString, GetStyle("paper_author"));
+
+            var website = WebUtility.UrlDecode(paper.DOI);
+            var paperString = string.Format("<p><a href='{2}' target='_blank'>{0}</a> <i>{1}</i></p>", GetPaperTitleString(paper), paper.PersonsString, website);
+            AddParagraph(paperString, GetStyle("paper_title"));
         }
 
         private string GetPaperTitleString(Item paper)
@@ -224,6 +208,8 @@ namespace ConferenceProgramToDocxMapper
 
         public void AddIconLegend()
         {
+            if (_iconDictionary.Count == 0) return;
+
             var legend = "Legend: ";
 
             foreach (var icon in _iconDictionary)
@@ -242,22 +228,7 @@ namespace ConferenceProgramToDocxMapper
 
         private void AddParagraph(string text, object styleName = null)
         {
-            var paragraph = _word.Paragraphs.Add();
-            paragraph.Range.Text = FormatString(text);
-
-            if (styleName != null)
-            {
-                try
-                {
-                    paragraph.set_Style(ref styleName);
-                }
-                catch
-                {
-                    Console.WriteLine("ERROR: style '{0}' does not exist.", styleName);
-                }
-            }
-
-            paragraph.Range.InsertParagraphAfter();
+            _html += (string.IsNullOrEmpty((string)styleName)) ? FormatString(text) : FormatString(string.Format("<{0}>{1}</{0}>", styleName, text));
 
             Console.WriteLine("> Added '{0}' with style '{1}'.", text, styleName);
         }
